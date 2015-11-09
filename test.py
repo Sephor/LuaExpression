@@ -60,3 +60,6 @@ class TestNumeralExpression(MyTestCase):
 		expected_outputs = [3, 345, 255, 12499674, 3.0, 3.1416, 3.1416, 3.1416,
 			340.0, 0.1]
 		self.assertYields(self.evaluate_valid, input_values, expected_outputs)
+
+class TestLiteralStringExpression(MyTestCase):
+	pass

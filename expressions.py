@@ -55,3 +55,7 @@ class NumeralExpression(AbstractExpression):
 			return int(self.raw, 0)
 		if self.is_float():
 			return float(self.raw)
+
+
+class LiteralStringExpression(AbstractExpression):
+	pass
