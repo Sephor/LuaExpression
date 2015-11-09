@@ -30,7 +30,7 @@ class BasicExpression(AbstractExpression):
 
 
 class NumeralExpression(AbstractExpression):
-	#Does not accept fractional hex strings.
+	#Does not accept fractional hex strings (i.e. 0xABC.1Ep-2).
 	re_int = re.compile(r'(\d+)')
 	re_hex_int = re.compile(r'(0(x|X)[0-9a-fA-F]+)')
 	re_float = re.compile(r'(\d*)(?P<dot>\.)?\d+' +
@@ -58,4 +58,9 @@ class NumeralExpression(AbstractExpression):
 
 
 class LiteralStringExpression(AbstractExpression):
-	pass
+
+	def is_valid(self):
+		pass
+
+	def evaluate_valid(self):
+		pass

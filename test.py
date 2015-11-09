@@ -10,6 +10,7 @@ class MyTestCase(unittest.TestCase):
 				self.assertEqual(function(*input_values[i]),
 					expected_outputs[i])
 
+
 class TestBasicExpressions(unittest.TestCase):
 
 	def test_is_valid(self):
@@ -36,18 +37,17 @@ class TestBasicExpressions(unittest.TestCase):
 
 class TestNumeralExpression(MyTestCase):
 
+	def is_valid(self, *s):
+		s = ''.join(s)
+		exp = expressions.NumeralExpression(s)
+		return exp.is_valid()
+
 	def test_is_valid(self):
 		valid = ['3', '345', '0xff', '0xBEBADA', '3.0', '3.1416', '314.16e-2',
 			'0.31416E1', '34e1', '.1']
 		invalid = ['', '3 ', '11.45.2', 'abf']
-		for s in valid:
-			with self.subTest(expression=s):
-				exp = expressions.NumeralExpression(s)
-				self.assertTrue(exp.is_valid())
-		for s in invalid:
-			with self.subTest(expression=s):
-				exp = expressions.NumeralExpression(s)
-				self.assertFalse(exp.is_valid())
+		self.assertYields(self.is_valid, valid, [True] * len(valid))
+		self.assertYields(self.is_valid, invalid, [False] * len(invalid))
 
 	def evaluate_valid(self, *s):
 		s = ''.join(s)
@@ -61,5 +61,28 @@ class TestNumeralExpression(MyTestCase):
 			340.0, 0.1]
 		self.assertYields(self.evaluate_valid, input_values, expected_outputs)
 
+
 class TestLiteralStringExpression(MyTestCase):
-	pass
+
+	def is_valid(self, *s):
+		s = ''.join(s)
+		exp = expressions.LiteralStringExpression(s)
+		return exp.is_valid()
+
+	def test_is_valid(self):
+		valid = ['""', "''", r"""'alo\n123"'""", r'"alo\n123\""',
+			r"""'\97lo\10\04923"'""", '[[alo\n123"]]', '[==[\nalo\n123"]==]']
+		invalid = ['"\'', "'''", '[=[foo]==]', '[=[bar]]', r'"\"']
+		self.assertYields(self.is_valid, valid, [True] * len(valid))
+		self.assertYields(self.is_valid, invalid, [False] * len(invalid))
+
+	def evaluate_valid(self, *s):
+		s = ''.join(s)
+		exp = expressions.LiteralStringExpression(s)
+		return exp.evaluate_valid()
+
+	def test_evaluate_valid(self):
+		input_values = ['""', "''", r"""'alo\n123"'""", r'"alo\n123\""',
+			r"""'\97lo\10\04923"'""", '[[alo\n123"]]', '[==[\nalo\n123"]==]']
+		expected_outputs = ['', '',] + ['alo\n123"'] * 5
+		self.assertYields(self.evaluate_valid, input_values, expected_outputs)
