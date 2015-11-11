@@ -66,6 +66,7 @@ class TestLiteralStringExpression(MyTestCase):
 
 	def is_valid(self, *s):
 		s = ''.join(s)
+		print(s)
 		exp = expressions.LiteralStringExpression(s)
 		return exp.is_valid()
 

@@ -58,9 +58,20 @@ class NumeralExpression(AbstractExpression):
 
 
 class LiteralStringExpression(AbstractExpression):
+	re_long_bracket = re.compile(
+		r'\[(?P<eq>=*)\[(?P<content>.*?[^\\])\](?P=eq)\]', re.S)
+	re_quotes = re.compile(r"""(?P<qt>'|")(?P<content>.*?)(?<=[^\\])(?P=qt)"""
+		, re.S)
+
+	def has_quotes(self):
+		print(self.re_quotes.fullmatch(self.raw))
+		return self.re_quotes.fullmatch(self.raw)
+
+	def has_long_brackets(self):
+		return self.re_long_bracket.fullmatch(self.raw)
 
 	def is_valid(self):
-		pass
+		return (self.has_quotes() or self.has_long_brackets()) != None
 
 	def evaluate_valid(self):
 		pass
