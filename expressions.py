@@ -267,7 +267,8 @@ class UnaryOperatorExpression(AbstractExpression):
 
 class GenericExpression(AbstractExpression):
 	known_expressions = [BasicExpression, NumeralExpression,
-		LiteralStringExpression, TableConstructorExpression]
+		LiteralStringExpression, TableConstructorExpression, PrefixExpression,
+		UnaryOperatorExpression]
 
 	def is_valid(self):
 		for expression_type in self.known_expressions:
