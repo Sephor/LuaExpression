@@ -14,7 +14,7 @@ The following Lua expressions can be evaluated:
 
 The following limitations apply:
 
-* Numerals cannot be hexadecimal constants with practional part or binary exponent
+* Numerals cannot be hexadecimal constants with fractional part or binary exponent
 * unop can only be ‘-’ or ‘not’
 
 ##Usage
