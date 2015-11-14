@@ -1,6 +1,6 @@
 import unittest
 
-import expressions
+from . import expressions
 
 class MyTestCase(unittest.TestCase):
 
@@ -123,7 +123,8 @@ class TestTableConstructorExpression(MyTestCase):
 		return exp.is_valid()
 
 	def test_is_valid(self):
-		valid = ['{}', '{1,2,3}', '{ 1\t;2,\n3}', "{['a'] = 1.1}", '{{}}']
+		valid = ['{}', '{1,2,3}', '{ 1\t;2,\n3}', "{['a'] = 1.1}", '{{},{}}',
+			'{\n{foo = \n"bar",\n\t bar = "foo"}}']
 		invalid = ['{{}', '{1 1 2}', '[]']
 		self.assertYields(self.is_valid, valid, [True] * len(valid))
 		self.assertYields(self.is_valid, invalid, [False] * len(invalid))

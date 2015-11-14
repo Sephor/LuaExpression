@@ -4,18 +4,27 @@ class AbstractExpression(object):
 
 	def __init__(self, string):
 		self.raw = string.strip()
+		self.invalid_exp = self #who's to blame if expression is invalid
 
 	@classmethod
 	def accepts(cls, string):
 		exp = cls(string)
 		return exp.is_valid()
 
+	def invalid_reason(self):
+		return 'Invalid {}: {}'.format(
+			type(self.invalid_exp).__name__, self.invalid_exp.raw)
+
 	def is_valid(self):
 		return False
+
+	def claims_valid(self):
+		return self.is_valid()
 
 	def evaluate(self):
 		if self.is_valid():
 			return self.evaluate_valid()
+		raise Exception(self.invalid_reason())
 
 	def evaluate_valid(self):
 		return None
@@ -133,9 +142,13 @@ class TableConstructorExpression(AbstractExpression):
 		exp_string = exp_candidates.pop(0)
 		while True:
 			exp = GenericExpression(exp_string)
-			if exp.is_valid():
-				self.keys_expressions.append(exp)
-				break
+			if exp.claims_valid():
+				if exp.is_valid():
+					self.keys_expressions.append(exp)
+					break
+				else:
+					self.invalid_exp = exp
+					return False
 			if len(exp_candidates) <= 0:
 				return False
 			exp_string += ']' + exp_candidates.pop(0)
@@ -147,8 +160,9 @@ class TableConstructorExpression(AbstractExpression):
 		if exp.is_valid():
 			self.value_expressions.append(exp)
 			return True
+		if exp.claims_valid():
+			self.invalid_exp = exp
 		return False
-
 
 	def extract_named_value(self, match):
 		key_exp = GenericExpression('"' + match.group('key') + '"')
@@ -158,6 +172,8 @@ class TableConstructorExpression(AbstractExpression):
 			self.keys_expressions.append(key_exp)
 			self.value_expressions.append(value_exp)
 			return True
+		if value_exp.claims_valid():
+			self.invalid_exp = value_exp
 		return False
 
 	def extract_value(self, string):
@@ -168,12 +184,14 @@ class TableConstructorExpression(AbstractExpression):
 			self.keys_expressions.append(key_exp)
 			self.value_expressions.append(value_exp)
 			return True
+		if value_exp.claims_valid:
+			self.invalid_exp = value_exp
 		return False
 
 	def is_field(self, string):
 		string = string.strip()
 		#‘[’ exp ‘]’ ‘=’ exp
-		if string[0] == '[':
+		if len(string) > 0 and string[0] == '[':
 			return self.extract_bracketed_expression(string)
 		#Name ‘=’ exp
 		match = self.re_name.match(string)
@@ -215,9 +233,12 @@ class TableConstructorExpression(AbstractExpression):
 		return False
 
 	def is_valid(self):
-		if len(self.raw) >= 2 and self.raw[0] == '{' and self.raw[-1] == '}':
+		if self.claims_valid():
 			return self.is_field_list(self.raw[1:-1])
 		return False
+
+	def claims_valid(self):
+		return len(self.raw) >= 2 and self.raw[0] == '{' and self.raw[-1] == '}'
 
 	def evaluate_valid(self):
 		if len(self.keys_expressions) != len(self.value_expressions):
@@ -232,11 +253,11 @@ class PrefixExpression(AbstractExpression):
 	#only supports prefixexp ::= ‘(’ exp ‘)’
 
 	def is_valid(self):
-		if len(self.raw) <= 2:
-			return False
 		self.internal_exp = GenericExpression(self.raw[1:-1])
-		return (self.raw[0] == '(' and self.raw[-1] == ')'
-			and self.internal_exp.is_valid())
+		return self.claims_valid() and self.internal_exp.is_valid()
+
+	def claims_valid(self):
+		return len(self.raw) >= 2 and self.raw[0] == '(' and self.raw[-1] == ')'
 
 	def evaluate_valid(self):
 		return self.internal_exp.evaluate()
@@ -273,11 +294,11 @@ class GenericExpression(AbstractExpression):
 	def is_valid(self):
 		for expression_type in self.known_expressions:
 			exp = expression_type(self.raw)
-			if exp.is_valid():
+			if exp.claims_valid():
 				self.expression = exp
-				return True
+				self.invalid_exp = exp
+				return self.expression.is_valid()
 		return False
 
 	def evaluate_valid(self):
-		#self.expression.is_valid has already been checked, so this is fine
-		return self.expression.evaluate_valid()
+		return self.expression.evaluate()
