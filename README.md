@@ -1,7 +1,7 @@
 # Pyton-Lua-Parser
 Module to evaluate most lua expressions in python.
 
-##Limitations
+## Limitations
 The following Lua expressions can be evaluated:
 
 	exp ::= prefixexp
@@ -17,7 +17,7 @@ The following limitations apply:
 * Numerals cannot be hexadecimal constants with fractional part or binary exponent
 * unop can only be ‘-’ or ‘not’
 
-##Usage
+## Usage
 To check if a string is a valid expression use:
 ```
 lua.is_valid(string)
